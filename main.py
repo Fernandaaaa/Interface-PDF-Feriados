@@ -68,7 +68,7 @@ class AppFeriados:
 
     def verificar_feriados_api(self, datas_pdf):
         if not datas_pdf:
-            return 0 
+            return [] 
 
         datas_por_ano = defaultdict(list)
         for data_str in datas_pdf: 
@@ -78,7 +78,10 @@ class AppFeriados:
         feriados_confirmados = []
         
         for ano, datas in datas_por_ano.items():
-            print(f"Verificando feriados para o ano {ano}...")
+            
+            log_msg = f"Verificando feriados para o ano {ano}..."
+            print(log_msg) 
+            
             url_api = f"https://date.nager.at/api/v3/PublicHolidays/{ano}/BR"
             
             try:
@@ -99,10 +102,10 @@ class AppFeriados:
         
         print(f"Feriados confirmados (da API): {feriados_confirmados}")
         
-        return len(feriados_confirmados)
+        return feriados_confirmados
 
     def iniciar_verificacao(self):
-        print("Iniciando verificação...")
+        
         self.listbox_resultados.delete(0, tk.END) 
         
         if not self.caminho_pdf:
@@ -123,10 +126,16 @@ class AppFeriados:
         self.listbox_resultados.insert(tk.END, f"Verificando {len(datas_do_pdf)} datas na API...")
         self.root.update_idletasks()
         
-        contagem_de_feriados = self.verificar_feriados_api(datas_do_pdf)
-
-        print(f"Total de feriados encontrados pela API: {contagem_de_feriados}")
-        self.listbox_resultados.insert(tk.END, f"{contagem_de_feriados} feriados encontrados.")
+        feriados_encontrados = self.verificar_feriados_api(datas_do_pdf)
+        
+        self.listbox_resultados.delete(0, tk.END)
+        
+        if not feriados_encontrados:
+            self.listbox_resultados.insert(tk.END, "Nenhum feriado encontrado.")
+        else:
+            self.listbox_resultados.insert(tk.END, "Feriados Encontrados:")
+            for data in sorted(feriados_encontrados): 
+                self.listbox_resultados.insert(tk.END, f"  {data}")
 
 if __name__ == "__main__":
     root = tk.Tk()
